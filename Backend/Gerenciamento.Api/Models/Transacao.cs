@@ -1,4 +1,6 @@
-﻿namespace Gerenciamento.Api.Models
+﻿using System.ComponentModel.DataAnnotations.Schema;
+
+namespace Gerenciamento.Api.Models
 {
     public class Transacao
     {
@@ -8,8 +10,11 @@
         public string tipo { get; set; } = string.Empty; //despesa ou receita
 
         public Guid idCategoria { get; set; }
-        public Categoria categoria { get; set; } = null!;
+        [ForeignKey("idCategoria")]
+        public virtual Categoria categoria { get; set; }
+        
         public Guid idPessoa { get; set; }
-        public Pessoa pessoa { get; set; } = null!;
+        [ForeignKey("idPessoa")]
+        public virtual Pessoa pessoa { get; set; }
     }
 }
