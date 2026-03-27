@@ -24,13 +24,15 @@ namespace Gerenciamento.Api.Services
             if (pessoa.idade < 18 && string.Equals(transacao.tipo, "Receita", StringComparison.OrdinalIgnoreCase))
                 throw new InvalidOperationException("Menores de 18 anos não podem registrar receitas, apenas despesas.");
 
-            var categoriaExiste = await _context.Categorias.FindAsync(transacao.idCategoria);
-            if (categoriaExiste == null)
+            var categoria = await _context.Categorias.FindAsync(transacao.idCategoria);
+            if (categoria == null)
                 throw new KeyNotFoundException("A categoria informada não existe.");
 
-            if (!string.Equals(transacao.tipo, categoriaExiste.finalidade, StringComparison.OrdinalIgnoreCase))
+            bool tipoTransacaoAmbas = string.Equals(categoria.finalidade, "Ambas", StringComparison.OrdinalIgnoreCase);
+
+            if (!string.Equals(transacao.tipo, categoria.finalidade, StringComparison.OrdinalIgnoreCase) && !tipoTransacaoAmbas)
             {
-                throw new InvalidOperationException($"Não é possível usar uma categoria de '{categoriaExiste.finalidade}' para uma transação do tipo '{transacao.tipo}'.");
+                throw new InvalidOperationException($"Não é possível usar uma categoria de '{categoria.finalidade}' para uma transação do tipo '{transacao.tipo}'.");
             }
 
             var novaTransacao = new Transacao
