@@ -15,14 +15,23 @@ namespace Gerenciamento.Api.Services
             _context = context;
         }
 
-        public async Task<Transacao> CriarTransacao(TransacaoDTO transacao)
+        public async Task<TransacaoResponseDTO> CriarTransacao(TransacaoDTO transacao)
         {
-            var pessoaExiste = await _context.Pessoas.AnyAsync(p => p.idPessoa == transacao.idPessoa);
-            if (!pessoaExiste)
-                throw new Exception("A pessoa informada não existe.");
-            var categoriaExiste = await _context.Categorias.AnyAsync(c => c.idCategoria == transacao.idCategoria);
-            if (!categoriaExiste)
-                throw new Exception("A categoria informada não existe.");
+            var pessoa = await _context.Pessoas.FindAsync(transacao.idPessoa);
+            if (pessoa == null)
+                throw new KeyNotFoundException("A pessoa informada não existe.");
+
+            if (pessoa.idade < 18 && string.Equals(transacao.tipo, "Receita", StringComparison.OrdinalIgnoreCase))
+                throw new InvalidOperationException("Menores de 18 anos não podem registrar receitas, apenas despesas.");
+
+            var categoriaExiste = await _context.Categorias.FindAsync(transacao.idCategoria);
+            if (categoriaExiste == null)
+                throw new KeyNotFoundException("A categoria informada não existe.");
+
+            if (!string.Equals(transacao.tipo, categoriaExiste.finalidade, StringComparison.OrdinalIgnoreCase))
+            {
+                throw new InvalidOperationException($"Não é possível usar uma categoria de '{categoriaExiste.finalidade}' para uma transação do tipo '{transacao.tipo}'.");
+            }
 
             var novaTransacao = new Transacao
             {
@@ -34,12 +43,24 @@ namespace Gerenciamento.Api.Services
             };
             _context.Transacoes.Add(novaTransacao);
             await _context.SaveChangesAsync();
-            return novaTransacao;
+
+
+            return new TransacaoResponseDTO
+            {
+                id = novaTransacao.idTransacao,
+                descricao = novaTransacao.descricao,
+                valor = novaTransacao.valor,
+                tipo = novaTransacao.tipo,
+                idCategoria = novaTransacao.idCategoria,
+                idPessoa = novaTransacao.idPessoa
+            };
         }
 
         public async Task<IEnumerable<Transacao>> ListarTodas()
         {
-            return await _context.Transacoes.ToListAsync();
+            return await _context.Transacoes
+                .OrderBy(t => t.descricao)
+                .ToListAsync();
         }
 
         public async Task<Transacao> ListarPorID(Guid id)
