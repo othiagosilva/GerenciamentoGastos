@@ -6,8 +6,8 @@ namespace Gerenciamento.Api.Interfaces
     public interface IPessoaService
     {
         Task<Pessoa> CriarPessoa (PessoaDTO pessoa);
-        Task<IEnumerable<Pessoa>> ListarTodas();
-        Task<Pessoa> ListarPorID(Guid id);
+        Task<IEnumerable<PessoaResponseDTO>> ListarTodas();
+        Task<PessoaResponseDTO> ListarPorID(Guid id);
         Task<Pessoa> AtualizarPessoa(Guid id, PessoaDTO pessoa);
         Task<bool> DeletarPessoa(Guid id);
 

@@ -20,7 +20,7 @@ namespace Gerenciamento.Api.Controllers
         /// </summary>
         [HttpGet]
         [ProducesResponseType(StatusCodes.Status200OK)]
-        public async Task<ActionResult<IEnumerable<Pessoa>>> ListarTodas() => Ok(await _pessoaService.ListarTodas());
+        public async Task<ActionResult<IEnumerable<PessoaResponseDTO>>> ListarTodas() => Ok(await _pessoaService.ListarTodas());
 
         /// <summary>
         /// Busca uma pessoa específica pelo seu ID único (GUID).
@@ -29,7 +29,7 @@ namespace Gerenciamento.Api.Controllers
         [HttpGet("{id:guid}")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
-        public async Task<ActionResult<Pessoa>> ListarPorID(Guid id)
+        public async Task<ActionResult<PessoaResponseDTO>> ListarPorID(Guid id)
         {
             var pessoa = await _pessoaService.ListarPorID(id);
 

@@ -27,19 +27,50 @@ namespace Gerenciamento.Api.Services
             return novaPessoa;
         }
 
-        public async Task<IEnumerable<Pessoa>> ListarTodas()
+        public async Task<IEnumerable<PessoaResponseDTO>> ListarTodas()
         {
-            return await _context.Pessoas
+            var pessoas = await _context.Pessoas 
                 .Include (p => p.transacoes)
                 .ToListAsync();
+
+            return pessoas.Select(pessoa => new PessoaResponseDTO
+            {
+                id = pessoa.idPessoa,
+                nome = pessoa.nome,
+                idade = pessoa.idade,
+                saldo = pessoa.transacoes.Sum(t => string.Equals(t.tipo, "Receita", StringComparison.OrdinalIgnoreCase) ? t.valor : -t.valor),
+                transacoes = pessoa.transacoes.Select(t => new TransacaoResponseDTO
+                {
+                    id = t.idTransacao,
+                    descricao = t.descricao,
+                    valor = t.valor,
+                    tipo = t.tipo
+                }).ToList()
+            }).ToList();
         }
 
-        public async Task<Pessoa> ListarPorID(Guid id)
+        public async Task<PessoaResponseDTO> ListarPorID(Guid id)
         {
-            return await _context.Pessoas
+            var pessoa = await _context.Pessoas
                         .Include(p => p.transacoes)
                         .FirstOrDefaultAsync(p => p.idPessoa == id);
+
+            return pessoa == null ? null : new PessoaResponseDTO
+            {
+                id = pessoa.idPessoa,
+                nome = pessoa.nome,
+                idade = pessoa.idade,
+                saldo = pessoa.transacoes.Sum(t => t.tipo == "Receita" ? t.valor : -t.valor),
+                transacoes = pessoa.transacoes.Select(t => new TransacaoResponseDTO
+                {
+                    id = t.idTransacao,
+                    descricao = t.descricao,
+                    valor = t.valor,
+                    tipo = t.tipo
+                }).ToList()
+            };
         }
+
 
         public async Task<Pessoa> AtualizarPessoa(Guid id, PessoaDTO pessoa)
         {

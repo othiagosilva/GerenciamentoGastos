@@ -74,13 +74,13 @@ namespace Gerenciamento.Api.Controllers
         [HttpPost]
         [ProducesResponseType(StatusCodes.Status201Created)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
-        public async Task<ActionResult<Transacao>> Post([FromBody] TransacaoDTO transacao) { 
+        public async Task<ActionResult<TransacaoResponseDTO>> Post([FromBody] TransacaoDTO transacao) { 
             if (!ModelState.IsValid)
                 return BadRequest(ModelState);
             
             var novaTransacao = await _transacaoService.CriarTransacao(transacao);
 
-            return CreatedAtAction(nameof(ListarPorID), new { id = novaTransacao.idTransacao }, novaTransacao);
+            return CreatedAtAction(nameof(ListarPorID), new { id = novaTransacao.id }, novaTransacao);
         }
 
     }

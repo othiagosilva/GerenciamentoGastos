@@ -9,13 +9,21 @@ namespace Gerenciamento.Api.Services
     public class CategoriaService : ICategoriaService
     {
         private readonly AppDbContext _context;
-        public CategoriaService(AppDbContext context) 
+        public CategoriaService(AppDbContext context)
         {
             _context = context;
         }
 
         public async Task<Categoria> CriarCategoria(CategoriaDTO categoria)
         {
+            var categoriaExistente = await _context.Categorias
+                .FirstOrDefaultAsync(c => c.descricao.ToLower() == categoria.descricao.ToLower());
+
+            if(categoriaExistente != null)
+            {
+                throw new InvalidOperationException("Já existe uma categoria com essa descrição.");
+            }
+
             var novaCategoria = new Categoria
             {
                 descricao = categoria.descricao,
@@ -29,7 +37,9 @@ namespace Gerenciamento.Api.Services
 
         public async Task<IEnumerable<Categoria>> ListarTodas()
         {
-            return await _context.Categorias.ToListAsync();
+            return await _context.Categorias
+                .OrderBy(c => c.descricao)
+                .ToListAsync();
         }
 
         public async Task<Categoria> ListarPorID(Guid id)

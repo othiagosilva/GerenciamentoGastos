@@ -5,7 +5,7 @@ namespace Gerenciamento.Api.Interfaces
 {
     public interface ITransacaoService
     {
-        Task<Transacao> CriarTransacao(TransacaoDTO transacao);
+        Task<TransacaoResponseDTO> CriarTransacao(TransacaoDTO transacao);
         Task<IEnumerable<Transacao>> ListarTodas();
         Task<Transacao> ListarPorID(Guid id);
         Task<IEnumerable<Transacao>> ListarPorPessoa(Guid idPessoa);
